@@ -9,7 +9,7 @@
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181c;--grid:rgba(255,255,255,.04);--fg:#e8ebee;--card:#1e242a;--bd:#38414a;--ac:#7fb2ee;--st:#4a5560;--thbg:#2c343c;--ok:#4cc27f;--bad:#ff8a5c;--mut:#9aa6b2;--hd:#0f1316}}
 :root[data-theme="dark"]{--bg:#14181c;--grid:rgba(255,255,255,.04);--fg:#e8ebee;--card:#1e242a;--bd:#38414a;--ac:#7fb2ee;--st:#4a5560;--thbg:#2c343c;--ok:#4cc27f;--bad:#ff8a5c;--mut:#9aa6b2;--hd:#0f1316}
 *{box-sizing:border-box}
-body{margin:0;background-color:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;color:var(--fg);font:14.5px/1.45 'IBM Plex Sans','Segoe UI',system-ui,Arial,sans-serif;font-variant-numeric:tabular-nums}
+body{margin:0;background-color:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;color:var(--fg);font:16px/1.45 'IBM Plex Sans','Segoe UI',system-ui,Arial,sans-serif;font-variant-numeric:tabular-nums}
 header{background:var(--hd);color:#f1f3f5;padding:14px var(--pad) 24px;display:flex;align-items:center;gap:14px;position:relative}
 header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9px;background:repeating-linear-gradient(-45deg,var(--yl) 0 12px,#232a31 12px 24px)}
 h1{font:600 26px/1 var(--head);margin:0;letter-spacing:.3px}
@@ -21,7 +21,7 @@ main{padding:18px 16px 56px;max-width:1280px;margin:auto}
 .card{background:var(--card);border:1px solid var(--bd);border-top:4px solid var(--st);border-radius:3px;padding:18px;margin-bottom:18px}
 main>.card:first-child{border-top-color:var(--yl)}
 h2{font:500 21px/1.2 var(--head);margin:0 0 14px;display:flex;align-items:center;gap:10px;letter-spacing:.2px}h2::before{content:"";width:10px;height:10px;background:var(--yl);flex:none}
-label{display:block;font-size:12.5px;font-weight:500;color:var(--mut);margin-bottom:4px}
+label{display:block;font-size:15px;font-weight:600;color:var(--fg);margin-bottom:4px}
 input,select,textarea,button{font:inherit;color:var(--fg);background:var(--card);border:1.5px solid var(--bd);border-radius:3px;padding:7px 9px}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--st);box-shadow:0 0 0 3px rgba(255,180,0,.5)}
 :focus-visible{outline:3px solid var(--yl);outline-offset:2px}
@@ -30,11 +30,12 @@ button.p{background:var(--yl);color:#1a1f24;border-color:#1a1f24;font-weight:600
 .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.g>div{min-width:0}.g select,.g input,.g textarea{width:100%;min-width:0}.wide{grid-column:1/-1}@media(min-width:1000px){.g6{grid-template-columns:2fr 1.4fr 1fr 1fr 1.2fr}}
 .big{font-size:16px;padding:11px 26px}summary{cursor:pointer;color:var(--ac);font-weight:500;padding:4px 0}td select{width:100%;min-width:150px}.sc{overflow-x:auto}
 table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid var(--bd);padding:5px 6px;text-align:left;vertical-align:middle}
-th{background:var(--thbg);color:var(--thfg);font-size:12.5px;font-weight:500;padding:9px 6px;white-space:nowrap}
+th{background:var(--thbg);color:var(--thfg);font-size:14px;font-weight:500;padding:9px 6px;white-space:nowrap}
 tr:nth-child(even) td{background:rgba(120,130,140,.07)}tr:hover td{background:rgba(255,180,0,.14)}td input{width:100%;min-width:70px}
 .ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}.err{color:var(--bad);margin:8px 0;font-weight:500}.err:not(:empty){border-left:4px solid var(--bad);padding:8px 12px;background:rgba(194,65,12,.08)}
-.note{color:var(--mut);font-size:12.5px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.note{color:var(--mut);font-size:14px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+input,select,textarea,button{font-size:16px}
 </style></head><body>
 <header><span class="mark"></span><h1>Пътни Листи Завинаги</h1></header>
 <nav id="nav"></nav><main id="app"></main>
