@@ -48,6 +48,16 @@ test('посещенията при клиенти са най-много 25 к�
   for (let i = 0; i < 200; i++) gen(50 + Math.floor(Math.random() * 2000)).filter(x => x.client).forEach(x => assert.ok(x.km <= 50 && x.km >= 2));
 });
 
+test('2–3 посещения при клиент на пълна работна седмица', () => {
+  const full = workdays('2026-10-05', '2026-10-18', new Set());       // две пълни седмици
+  for (let i = 0; i < 100; i++) {
+    const t = generate(900, full, S.dests, 300, 0, 0), wk = {};
+    t.filter(x => x.client).forEach(x => { const k = x.date < '2026-10-12' ? 1 : 2; wk[k] = (wk[k] || 0) + 1; });
+    [1, 2].forEach(k => assert.ok(wk[k] >= 2 && wk[k] <= 4, `седмица ${k}: ${wk[k]}`));
+    assert.equal(sum(t), 900);
+  }
+});
+
 test('без повтарящи се шаблони: поне половината маршрути са различни', () => {
   const t = gen(1000), uniq = new Set(t.map(x => x.ids.join('-') + '|' + x.km)).size;
   assert.ok(uniq / t.length >= 0.5, `${uniq}/${t.length}`);

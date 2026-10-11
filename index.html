@@ -2,21 +2,41 @@
 <html lang="bg"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Пътни Листи Завинаги</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f7f9;--fg:#1d2330;--card:#fff;--bd:#d9dde5;--ac:#1b5fd1;--ok:#1a7f45;--bad:#c0392b;--mut:#657089;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--fg:#e6e9ef;--card:#1d2129;--bd:#323846;--ac:#6ea2ff;--ok:#4cc27f;--bad:#ff7a6b;--mut:#9aa4b8}}
-:root[data-theme="dark"]{--bg:#14171c;--fg:#e6e9ef;--card:#1d2129;--bd:#323846;--ac:#6ea2ff;--ok:#4cc27f;--bad:#ff7a6b;--mut:#9aa4b8}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px system-ui,Arial,sans-serif}
-header{padding:12px 16px;border-bottom:1px solid var(--bd);background:var(--card)}h1{font-size:18px;margin:0}
-nav{display:flex;gap:6px;padding:10px 16px;flex-wrap:wrap}nav button{padding:8px 14px}nav .on{background:var(--ac);color:#fff;border-color:var(--ac)}
-main{padding:0 16px 40px;max-width:1280px;margin:auto}.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:14px}
-h2{font-size:15px;margin:0 0 10px}label{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}
-input,select,textarea,button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:6px 8px}button{cursor:pointer}button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
-.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.g>div{min-width:0}.g select,.g input,.g textarea{width:100%;min-width:0}.wide{grid-column:1/-1}@media(min-width:1000px){.g6{grid-template-columns:2fr 1.4fr 1fr 1fr 1.2fr}}.big{font-size:16px;padding:10px 22px}summary{padding:4px 0}td select{width:100%;min-width:150px}.sc{overflow-x:auto}
-table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid var(--bd);padding:4px;text-align:left;vertical-align:middle}th{font-size:12px;color:var(--mut)}td input{width:100%;min-width:70px}
-.ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}.err{color:var(--bad);margin:8px 0}.note{color:var(--mut);font-size:12px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+:root{--bg:#e6e9ec;--grid:rgba(35,42,49,.055);--fg:#1f262d;--card:#fff;--bd:#c5ccd3;--ac:#1d5fa6;--yl:#ffb400;--yl-d:#a87500;--st:#2a323a;--thbg:#2a323a;--thfg:#f1f3f5;--ok:#17743f;--bad:#c2410c;--mut:#59636e;--hd:#232a31;--pad:max(16px,calc((100vw - 1280px)/2 + 16px));--head:Oswald,'Arial Narrow','Roboto Condensed',sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181c;--grid:rgba(255,255,255,.04);--fg:#e8ebee;--card:#1e242a;--bd:#38414a;--ac:#7fb2ee;--st:#4a5560;--thbg:#2c343c;--ok:#4cc27f;--bad:#ff8a5c;--mut:#9aa6b2;--hd:#0f1316}}
+:root[data-theme="dark"]{--bg:#14181c;--grid:rgba(255,255,255,.04);--fg:#e8ebee;--card:#1e242a;--bd:#38414a;--ac:#7fb2ee;--st:#4a5560;--thbg:#2c343c;--ok:#4cc27f;--bad:#ff8a5c;--mut:#9aa6b2;--hd:#0f1316}
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;color:var(--fg);font:14.5px/1.45 'IBM Plex Sans','Segoe UI',system-ui,Arial,sans-serif;font-variant-numeric:tabular-nums}
+header{background:var(--hd);color:#f1f3f5;padding:14px var(--pad) 24px;display:flex;align-items:center;gap:14px;position:relative}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9px;background:repeating-linear-gradient(-45deg,var(--yl) 0 12px,#232a31 12px 24px)}
+h1{font:600 26px/1 var(--head);margin:0;letter-spacing:.3px}
+.mark{width:36px;height:36px;position:relative;flex:none;background:linear-gradient(#232a31,#232a31) 7px 7px/22px 6px no-repeat,linear-gradient(#232a31,#232a31) 7px 23px/22px 6px no-repeat,var(--yl)}.mark::after{content:"";position:absolute;left:15px;right:15px;top:13px;bottom:13px;background:#232a31}
+nav{display:flex;gap:2px;padding:14px var(--pad) 0;flex-wrap:wrap}
+nav button{background:transparent;border:0;border-bottom:4px solid transparent;border-radius:0;font:500 17px var(--head);color:var(--mut);padding:8px 16px;box-shadow:none}
+nav button:hover{color:var(--fg);border-color:transparent;border-bottom-color:var(--bd)}nav .on,nav .on:hover{color:var(--fg);border-bottom-color:var(--yl)}
+main{padding:18px 16px 56px;max-width:1280px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-top:4px solid var(--st);border-radius:3px;padding:18px;margin-bottom:18px}
+main>.card:first-child{border-top-color:var(--yl)}
+h2{font:500 21px/1.2 var(--head);margin:0 0 14px;display:flex;align-items:center;gap:10px;letter-spacing:.2px}h2::before{content:"";width:10px;height:10px;background:var(--yl);flex:none}
+label{display:block;font-size:12.5px;font-weight:500;color:var(--mut);margin-bottom:4px}
+input,select,textarea,button{font:inherit;color:var(--fg);background:var(--card);border:1.5px solid var(--bd);border-radius:3px;padding:7px 9px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--st);box-shadow:0 0 0 3px rgba(255,180,0,.5)}
+:focus-visible{outline:3px solid var(--yl);outline-offset:2px}
+button{cursor:pointer;font-weight:500;transition:transform .08s}button:hover{border-color:var(--st)}button:active{transform:translateY(1px)}button:disabled{opacity:.45;cursor:not-allowed}
+button.p{background:var(--yl);color:#1a1f24;border-color:#1a1f24;font-weight:600;box-shadow:0 3px 0 var(--yl-d)}button.p:active{box-shadow:0 1px 0 var(--yl-d);transform:translateY(2px)}button.p:disabled{box-shadow:none}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.g>div{min-width:0}.g select,.g input,.g textarea{width:100%;min-width:0}.wide{grid-column:1/-1}@media(min-width:1000px){.g6{grid-template-columns:2fr 1.4fr 1fr 1fr 1.2fr}}
+.big{font-size:16px;padding:11px 26px}summary{cursor:pointer;color:var(--ac);font-weight:500;padding:4px 0}td select{width:100%;min-width:150px}.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid var(--bd);padding:5px 6px;text-align:left;vertical-align:middle}
+th{background:var(--thbg);color:var(--thfg);font-size:12.5px;font-weight:500;padding:9px 6px;white-space:nowrap}
+tr:nth-child(even) td{background:rgba(120,130,140,.07)}tr:hover td{background:rgba(255,180,0,.14)}td input{width:100%;min-width:70px}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}.err{color:var(--bad);margin:8px 0;font-weight:500}.err:not(:empty){border-left:4px solid var(--bad);padding:8px 12px;background:rgba(194,65,12,.08)}
+.note{color:var(--mut);font-size:12.5px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
-<header><h1>Пътни Листи Завинаги</h1></header>
+<header><span class="mark"></span><h1>Пътни Листи Завинаги</h1></header>
 <nav id="nav"></nav><main id="app"></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
@@ -25,7 +45,7 @@ table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid var(--bd
 const KEY='pl_v2',FUELS=['Бензин','Дизел','Електрически','Газ (пропан-бутан)','Метан'],U=v=>v.fuel=='Електрически'?'kWh':'л';
 const DD=()=>[{id:1,name:'MONA 5, Манастирски ливади-изток',km:9,type:'obj',purpose:''},{id:16,name:'MONA 6, Манастирски ливади-изток',km:9,type:'obj',purpose:''},{id:2,name:'SREDA, Манастирски ливади-изток',km:9,type:'obj',purpose:''},{id:3,name:'UPTOWN SQUARE, Лозенец',km:5,type:'obj',purpose:''},{id:4,name:'SECRET GARDENS, Лозенец',km:6,type:'obj',purpose:''},{id:5,name:'SONATA, ул. Филип Аврамов',km:6,type:'obj',purpose:''},{id:6,name:'AVIVA Living, Възраждане',km:8,type:'obj',purpose:''},{id:7,name:'SLOW LIFE, Владая',km:23,type:'obj',purpose:''},{id:8,name:'KRISTA, Кръстова вада',km:9,type:'obj',purpose:''},{id:9,name:'Столична община, ул. Московска 33',km:5,type:'adm',purpose:''},{id:10,name:'МРРБ, ул. Св. св. Кирил и Методий 17',km:5,type:'adm',purpose:''},{id:11,name:'Съдебна палата, бул. Витоша 2',km:5,type:'adm',purpose:''},{id:12,name:'НАП, Централно управление',km:6,type:'adm',purpose:''},{id:13,name:'Агенция по вписванията',km:7,type:'adm',purpose:''},{id:14,name:'АГКК (Кадастър)',km:8,type:'adm',purpose:''},{id:15,name:'ДНСК',km:6,type:'adm',purpose:''}];
 const PURP={client:['Среща с клиент на адрес','Оглед при клиент','Консултация при клиент','Връчване на документи на клиент'],obj:['Оглед на обект','Контрол на СМР','Среща с подизпълнител','Среща с клиент','Приемане на изпълнени СМР','Контрол на доставка на материали'],adm:['Подаване на документи','Получаване на документи','Среща в администрацията','Справка и съгласуване']};
-let S=load(),TAB='new',DRAFT=null,ERR='';
+let S=load(),TAB='new',DRAFT=null,ISSUED=null,ERR='';
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s){s.offices=s.offices||[];s.clients=s.clients||[];if(s.dv!==2){const nd=DD();s.dests=[...nd.map(n=>{const o=s.dests.find(x=>x.id==n.id);return o?Object.assign(o,{name:n.name,km:n.km,type:n.type}):n}),...s.dests.filter(x=>!nd.some(n=>n.id==x.id))];s.dv=2}return s}}catch(e){}
 return{company:{name:'BLD (допълнете пълното наименование)',eik:'',addr:'гр. София, ул. „Тинтява“ 126',mol:''},
 base:'BLD – офис, ул. „Тинтява“ 126, София',vehicles:[{id:1,make:'Škoda',model:'Octavia',plate:'СВ 1234 АА',fuel:'Дизел',cons:5.8,odo:45000}],
@@ -116,7 +136,7 @@ ${inp('Краен километраж','eo','','number','inputmode="numeric" on
 <div><label>Офис (начална и крайна точка)</label><select id="sp">${ptOpts()}</select></div>
 ${inp('Начален километраж','so','','number','inputmode="numeric" oninput="syncOdo()"')}${inp('От тях лични км','pk','0','number','inputmode="numeric"')}</div>
 <div style="margin-top:12px"><label>Зареждания (по избор)</label><div id="refs">${refRows()}</div><button type="button" onclick="addRef()" style="margin-top:6px">+ Добави зареждане</button></div></details>
-<div id="err" class="err">${esc(ERR)}</div><div class="row"><button class="p big" onclick="gen()">Генерирай маршрути</button></div></div>${d?vReview():''}`}
+<div id="err" class="err">${esc(ERR)}</div><div class="row"><button class="p big" onclick="gen()">Генерирай маршрути</button></div></div>${d?vReview():vIssued()}`}
 let REF=[{d:'',l:'',n:''}];
 const refRows=()=>REF.map((r,i)=>`<div class="row" style="margin:4px 0"><input type="date" value="${esc(r.d)}" title="Дата на зареждане" oninput="REF[${i}].d=this.value" style="width:160px"><input type="number" step="0.01" min="0" inputmode="decimal" placeholder="Литри / kWh" value="${esc(r.l)}" oninput="REF[${i}].l=this.value" style="width:130px"><input type="text" placeholder="№ на фактура" value="${esc(r.n)}" oninput="REF[${i}].n=this.value" style="width:200px"><button type="button" title="Премахни" onclick="REF.splice(${i},1);if(!REF.length)REF=[{d:'',l:'',n:''}];$('refs').innerHTML=refRows()">✕</button></div>`).join('');
 function addRef(){REF.push({d:'',l:'',n:''});$('refs').innerHTML=refRows()}
@@ -138,8 +158,9 @@ if(pk<0||pk>eo-so)throw'Невалидни лични км';if(eo-so-pk<=0)throw
 const sp=+$('sp').value,ep=sp,md='all';let dl=md=='all'?S.dests:[];
 
 const rt=refText(pf,pt);CUR={s:sp,e:ep};const days=workdays(pf,pt,new Set()),trips=generate(eo-so-pk,days,dl,mx,sp,ep,md=='direct'?6:3);if(md=='direct'){const c={};trips.forEach(t=>{c[t.date]=(c[t.date]||0)+1;if(c[t.date]%2==0){t.fromId=ep;t.toId=sp}})}trips.forEach(t=>describe(t));
-DRAFT={company:{...S.company},vehicle:{...v},driver:{...dr},base:S.base,from:pf,to:pt,startOdo:so,endOdo:eo,personal:pk,refuels:rt,trips,params:{pf,pt,mx,off:'',s:sp,e:ep,dl:dl.map(d=>d.id)}};recalc(DRAFT);S.lastVeh=v.id;const vv=S.vehicles.find(x=>x.id==v.id);if(vv)vv.drv=dr.id;save()}catch(e){ERR=String(e.message||e);DRAFT=null;if(/Още опции|точк|Водач|период|Период|километраж/.test(ERR))ADV=true}
+ISSUED=null;DRAFT={company:{...S.company},vehicle:{...v},driver:{...dr},base:S.base,from:pf,to:pt,startOdo:so,endOdo:eo,personal:pk,refuels:rt,trips,params:{pf,pt,mx,off:'',s:sp,e:ep,dl:dl.map(d=>d.id)}};recalc(DRAFT);S.lastVeh=v.id;const vv=S.vehicles.find(x=>x.id==v.id);if(vv)vv.drv=dr.id;save()}catch(e){ERR=String(e.message||e);DRAFT=null;if(/Още опции|точк|Водач|период|Период|километраж/.test(ERR))ADV=true}
 const k=snap();render();restore(k)}
+function vIssued(){const x=S.sheets[ISSUED];if(!x)return'';return`<div class="card"><h2>Издаден: ${esc(x.no)}</h2><p>${esc(x.vehicle.plate||'')} · ${esc(x.driver.name||'')} · ${dm(x.from)} – ${dm(x.to)} · <b>${x.sumKm} км</b></p><div class="row"><button class="p big" onclick="expPdf([ISSUED])">Свали PDF</button><button class="big" onclick="expXls([ISSUED])">Свали Excel</button><button onclick="ISSUED=null;render()">Скрий</button></div><p class="muted">Всички издадени листове са в „История“.</p></div>`}
 function vReview(){const d=DRAFT,ok=Math.abs(d.diff)<=1,
 bar=`<p>Сума на маршрутите: <b>${d.sumKm} км</b> · Въведени (без лични): <b>${d.target} км</b> · Разлика: <span class="${ok?'ok':'bad'}">${d.diff>0?'+':''}${d.diff} км ${ok?'(в толеранса ±1 км)':'(над толеранса!)'}</span><br>Нормативен разход на гориво (${esc(d.vehicle.fuel)}): <b>${nf(d.liters)} ${U(d.vehicle)}</b> (${nf(d.vehicle.cons,1)} ${U(d.vehicle)}/100 км) · Лични км: ${d.personal}</p>
 <div class="row"><button class="p big" ${ok?'':'disabled'} onclick="saveSheet()">Издай пътен лист</button><button class="big" ${ok?'':'disabled'} onclick="saveSheet(true)">Издай и свали PDF</button><button onclick="gen()">Прегенерирай всичко</button></div>`;
@@ -149,7 +170,7 @@ const IDS=['veh','drv','sp','pf','pt','so','eo','pk'];const snap=()=>IDS.map(i=>
 function upd(){recalc(DRAFT);const k=window.scrollY,f=snap();render();restore(f);scrollTo(0,k)}
 function regen(i){const t=DRAFT.trips[i];if(t.client){toast('Посещенията при клиент не се прегенерират – при нужда променете километрите или текста ръчно.');return}const o=combos(S.dests.concat(S.clients).filter(d=>DRAFT.params.dl.includes(d.id)),DRAFT.params.mx-5,DRAFT.params.s,DRAFT.params.e).filter(o=>Math.abs(o.km-t.km)<=Math.max(8,t.km*.15)&&o.ids.join()!=t.ids.join());if(!o.length){toast('Няма подходяща алтернатива с този пробег');return}
 const c=o[rint(0,o.length-1)];t.ids=c.ids;t.base=c.km;describe(t);upd()}
-function saveSheet(pdf){const d=DRAFT;d.trips=d.trips.filter(t=>t.km>0);recalc(d);if(Math.abs(d.diff)>1)return;if(d.trips.some(t=>!t.date||t.date<d.from||t.date>d.to)){toast('Има маршрути с дата извън избрания период.');return}d.trips.sort((a,b)=>a.date<b.date?-1:1);recalc(d);S.seq++;d.no=`ПЛ-${d.to.slice(0,4)}-${pad(S.seq,4)}`;d.issued=today();S.sheets.push(d);save();DRAFT=null;REF=[{d:'',l:'',n:''}];TAB='hist';render();if(pdf===true)expPdf([S.sheets.length-1])}
+function saveSheet(pdf){const d=DRAFT;d.trips=d.trips.filter(t=>t.km>0);recalc(d);if(Math.abs(d.diff)>1)return;if(d.trips.some(t=>!t.date||t.date<d.from||t.date>d.to)){toast('Има маршрути с дата извън избрания период.');return}d.trips.sort((a,b)=>a.date<b.date?-1:1);recalc(d);S.seq++;d.no=`ПЛ-${d.to.slice(0,4)}-${pad(S.seq,4)}`;d.issued=today();S.sheets.push(d);save();DRAFT=null;REF=[{d:'',l:'',n:''}];ISSUED=S.sheets.length-1;render();toast('Издаден '+d.no);if(pdf===true)expPdf([S.sheets.length-1])}
 function toast(m){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:9;max-width:90%';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',7000)}
 let CONF='';
 function delSheet(i){if(CONF!=='d'+i){CONF='d'+i;render();return}CONF='';S.sheets.splice(i,1);S.seq=Math.max(0,...S.sheets.map(z=>parseInt(z.no.slice(-4),10)||0));save();render();toast('Листът е изтрит.')}
