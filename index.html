@@ -33,7 +33,7 @@ th{background:var(--thbg);color:var(--thfg);font-size:14px;font-weight:700;paddi
 tr:hover td{background:rgba(209,31,46,.08)}td input{width:100%;min-width:70px}
 .ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}.err{color:var(--bad);margin:8px 0;font-weight:600}.err:not(:empty){border-left:4px solid var(--bad);padding:8px 12px;background:rgba(194,65,12,.07)}
 .note{color:var(--mut);font-size:14px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
-.has-photo header{min-height:132px;background:linear-gradient(90deg,rgba(176,22,36,.96) 0,rgba(200,32,46,.78) 32%,rgba(200,32,46,.22) 62%,rgba(200,32,46,0) 100%),url(header.jpg) center/cover}.has-photo .sky{display:none}
+.has-photo header{min-height:132px;background:linear-gradient(90deg,rgba(176,22,36,1) 0,rgba(200,32,46,.8) 30%,rgba(200,32,46,.25) 65%,rgba(200,32,46,0) 100%) right top/838px 100% no-repeat,url(header.jpg) right top/838px 100% no-repeat,#b01624}.has-photo .sky{display:none}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 input,select,textarea,button{font-size:16px}
 .sticky{position:sticky;bottom:0;z-index:5;background:var(--card);border-top:1px solid var(--bd);margin:14px -18px -18px;padding:12px 18px}
@@ -116,7 +116,7 @@ return`<div class="card"><h2>Как да направя пътен лист – 
 <li>Отворете ${T('Нов пътен лист')}.</li>
 <li>Изберете <b>автомобил</b> и <b>водач</b> от списъците.</li>
 <li>Периодът (от коя до коя дата) се попълва сам. Ако искате друг период, сменете датите.</li>
-<li>Въведете в полето <b>Километраж в края на периода</b> какво показва километражът на колата в края на периода.</li>
+<li>Въведете в полето <b>КМ края на периода</b> какво показва километражът на колата в края на периода.</li>
 <li>Натиснете <b>„Генерирай маршрути“</b>. Приложението само ще измисли маршрутите за всеки работен ден, така че сборът да излезе точно колкото сте въвели.</li>
 <li>Прегледайте резултата в същия таб. Ако някой ред не ви харесва, натиснете <b>↻</b> (друг маршрут) или <b>✕</b> (махане на реда).</li>
 <li>Когато всичко е наред, натиснете <b>„Издай и свали PDF“</b> или <b>„Издай и свали Excel“</b>. Листът получава свой пореден номер и файлът се сваля.</li>
@@ -126,7 +126,7 @@ return`<div class="card"><h2>Как да направя пътен лист – 
 `${T('История')} – списък на издадените листове. Можете да търсите по автомобил и период и да сваляте PDF или Excel.`,
 `${T('Автомобили, водачи, дестинации')} – тук добавяте или променяте автомобили (марка, модел, номер, гориво, разход на 100 км, начален километраж), водачи и собствени места за посещение. Данните на фирмата са само за четене (🔒).`,
 `${T('Инструкции')} – тази страница.`])}</div>
-<div class="card"><h2>Допълнителни възможности (бутон „Още опции“ в таб „Нов пътен лист“)</h2>${li(['<b>Офис</b> – откъде тръгва и къде свършва всеки ден. По подразбиране е офисът на водача.','<b>Километраж в началото на периода</b> – попълва се сам от предходния отчет. Променяйте го само ако е различен.','<b>Лични километри</b> – километри, които не са служебни. Не влизат в маршрутите.','<b>Зареждания</b> – изберете дата, въведете литри (или kWh) и номер на фактура. Датата трябва да е в периода на листа.','<b>Одобрил (МОЛ)</b> – по подразбиране е вписан <b>Димитър Бончев Савов</b>. Ако не искате име в листа, изберете „— без име (по избор) —“.'])}</div>
+<div class="card"><h2>Допълнителни възможности (бутон „Още опции“ в таб „Нов пътен лист“)</h2>${li(['<b>Офис</b> – откъде тръгва и къде свършва всеки ден. По подразбиране е офисът на водача.','<b>Лични километри</b> – километри, които не са служебни. Не влизат в маршрутите.','<b>Зареждания</b> – изберете дата, въведете литри (или kWh) и номер на фактура. Датата трябва да е в периода на листа.','<b>Одобрил (МОЛ)</b> – по подразбиране е вписан <b>Димитър Бончев Савов</b>. Ако не искате име в листа, изберете „— без име (по избор) —“.'])}</div>
 <div class="card"><h2>Какво не може и защо</h2>${li([
 '<b>Грешка до 1 км е нормална.</b> Много рядко сборът на маршрутите се различава с 1 км от въведения. По-голяма разлика не се допуска и листът не се издава.',
 '<b>Километраж в края, по-малък от този в началото, не се приема.</b> Всеки нов лист започва там, където е свършил предишният за същата кола.',
@@ -178,11 +178,11 @@ return`<div class="card"><h2>Нов пътен лист</h2><div class="g g6">
 <div class="s2"><label>Автомобил</label><select id="veh" onchange="autoPeriod()">${v.map(x=>`<option value="${x.id}">${esc(x.plate)} – ${esc(x.make)} ${esc(x.model)}</option>`).join('')}</select></div>
 <div><label>Водач</label><select id="drv" onchange="drvBase()"><option value="">— изберете водач —</option>${S.drivers.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></div>
 ${inp('Период от','pf','','date','onchange="setTo()"')}${inp('Период до','pt','','date','onchange="syncOdo(true)"')}
-${inp('Километраж в края на периода','eo','','number','inputmode="numeric" oninput="odoNote()" onkeydown="if(event.key===\'Enter\')gen()"')}</div>
+${inp('КМ края на периода','eo','','number','inputmode="numeric" oninput="odoNote()" onkeydown="if(event.key===\'Enter\')gen()"')}</div>
 <p class="note" id="sonote"></p>
 <details id="adv" ${ADV?'open':''} ontoggle="ADV=this.open" style="margin-top:8px"><summary style="cursor:pointer;color:var(--ac)">Още опции (офис, лични км, зареждания)</summary><div class="g" style="margin-top:10px">
 <div><label>Офис (начална и крайна точка)</label><select id="sp">${ptOpts()}</select></div>
-${inp('Километраж в началото на периода (автоматично от предходния отчет)','so','','number','inputmode="numeric" oninput="syncOdo()"')}${inp('От тях лични км','pk','0','number','inputmode="numeric"')}<div><label>Одобрил (МОЛ)</label><select id="ap">${mols().map(x=>`<option>${esc(x)}</option>`).join('')}<option value="">— без име (по избор) —</option></select></div></div>
+<div style="display:none">${inp('Километраж в началото на периода','so','','number','inputmode="numeric" oninput="syncOdo()"')}</div>${inp('От тях лични км','pk','0','number','inputmode="numeric"')}<div><label>Одобрил (МОЛ)</label><select id="ap">${mols().map(x=>`<option>${esc(x)}</option>`).join('')}<option value="">— без име (по избор) —</option></select></div></div>
 <div style="margin-top:12px"><label>Зареждания (по избор)</label><div id="refs">${refRows()}</div><button type="button" onclick="addRef()" style="margin-top:6px">+ Добави зареждане</button></div></details>
 <div id="err" class="err">${esc(ERR)}</div><div class="row"><button class="p big" onclick="gen()">Генерирай маршрути</button></div></div>${d?vReview():vIssued()}`}
 let REF=[{d:'',l:'',n:''}];
@@ -200,7 +200,7 @@ const odoNote=()=>{const n=$('sonote');if(n&&$('so')){const a=+$('so').value,b=+
 function syncTot(){odoNote()}
 function gen(){ERR='';try{const c0=S.company;if(!c0.name||/допълнете/i.test(c0.name)||!c0.eik||!c0.addr)throw'Попълнете данните на фирмата (наименование, ЕИК, адрес) в „Автомобили, водачи, дестинации“.';const v=S.vehicles.find(x=>x.id==$('veh').value),dr=S.drivers.find(x=>x.id==$('drv').value);if(!v||!dr)throw'Изберете водач (а ако липсва – добавете го в „Настройки“)';
 const so=+$('so').value,eo=+$('eo').value,pk=+$('pk').value||0,pf=$('pf').value,pt=$('pt').value,mx=300;
-if(!pf||!pt||pt<pf)throw'Невалиден период';if(!eo)throw'Въведете километраж в края на периода';if(eo<so)throw'Километражът в края на периода не може да е по-малък от този в началото';
+if(!pf||!pt||pt<pf)throw'Невалиден период';if(!eo)throw'Въведете КМ края на периода';if(eo<so)throw'Километражът в края на периода не може да е по-малък от този в началото';
 const ov=vs(v.id).find(x=>x.from<=pt&&x.to>=pf);if(ov)throw`Периодът се припокрива с вече издадения ${ov.no} (${dm(ov.from)} – ${dm(ov.to)}) за същия автомобил. Изберете друг период или автомобил, или изтрийте листа от „История“ (само ако е последният издаден).`;const l=prevSheet(v.id,pf),nx=nextSheet(v.id,pt);if(l&&so!==l.endOdo)throw`Началният километраж трябва да е ${l.endOdo} км – краят на предишния период (${dm(l.from)} – ${dm(l.to)})`;if(nx&&eo!==nx.startOdo)throw`Крайният километраж трябва да е ${nx.startOdo} км – началото на следващия период (${dm(nx.from)} – ${dm(nx.to)})`
 if(pk<0||pk>eo-so)throw'Невалидни лични км';if(eo-so-pk<=0)throw'Крайният километраж трябва да е по-голям от началния';
 const sp=+$('sp').value,ep=sp,md='all';let dl=md=='all'?S.dests:[];
