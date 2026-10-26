@@ -1,12 +1,12 @@
-// Тестове на записа и зареждането на данните (js/storage.js) с фалшиво localStorage.
-// Стартиране:  node --test   или   node tests/storage.test.mjs
+// Тестове на записа и зареждането на данните (storage.js) с фалшиво localStorage.
+// Стартиране:  node --test   или   node storage.test.mjs
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const Store = require('../js/storage.js');
-const AppData = require('../js/data.js');
+const Store = require('./storage.js');
+const AppData = require('./data.js');
 const { defaults, migrate } = AppData;
 
 /** localStorage в паметта; може да откаже четене, запис или да има малък лимит. */

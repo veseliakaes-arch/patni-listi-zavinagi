@@ -1,14 +1,14 @@
 // Тестове на алгоритъма за маршрути.
 // Стартиране:  node --test            (всички тестове, Node 18+, без външни зависимости)
-//              node tests/algorithm.test.mjs
+//              node algorithm.test.mjs
 // Всички случайни генерирания са със семе, за да се повтарят. Друго семе: SEED=12345 node --test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const Algo = require('../js/algorithm.js');
-const AppData = require('../js/data.js');
+const Algo = require('./algorithm.js');
+const AppData = require('./data.js');
 
 const SEED = Number(process.env.SEED) || 20261020;
 const rng = (salt = 0) => Algo.seededRng(SEED + salt);
