@@ -99,7 +99,94 @@ var AppData = (function () {
     return s;
   }
 
-  return { COMPANY, BASE, FUELS, DESTS, LOCKED, isLocked, COORDS, defaults, migrate };
+  /**
+   * Строга проверка на резервно копие преди възстановяване: всяко поле трябва да е от
+   * очаквания вид (числа – числа, дати – ГГГГ-ММ-ДД, номер – ПЛ-ГГГГ-NNNN). Така подправен
+   * файл не може да вкара в страницата HTML или код. Хвърля грешка с първия проблем.
+   */
+  function checkBackup(s) {
+    const fail = (where, what) => {
+      throw new Error(`${where}: ${what}`);
+    };
+    const num = (v, where) => (typeof v === 'number' && isFinite(v)) || fail(where, 'трябва да е число');
+    const str = (v, where) => typeof v === 'string' || fail(where, 'трябва да е текст');
+    const opt = (v, check, where) => v === undefined || v === null || check(v, where);
+    const date = (v, where) =>
+      (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)) || fail(where, 'невалидна дата');
+    const list = (v, where) => Array.isArray(v) || fail(where, 'трябва да е списък');
+
+    list(s.vehicles, 'автомобили');
+    s.vehicles.forEach((v, i) => {
+      const w = `автомобил ${i + 1}`;
+      num(v.id, w + ', id');
+      ['make', 'model', 'plate', 'fuel'].forEach((k) => opt(v[k], str, `${w}, ${k}`));
+      opt(v.cons, num, w + ', разход');
+      opt(v.odo, num, w + ', километраж');
+      opt(v.drv, num, w + ', водач');
+    });
+    list(s.drivers, 'водачи');
+    s.drivers.forEach((d, i) => {
+      const w = `водач ${i + 1}`;
+      num(d.id, w + ', id');
+      opt(d.name, str, w + ', име');
+      opt(d.pos, str, w + ', длъжност');
+      opt(d.base, num, w + ', офис');
+    });
+    for (const [k, name] of [
+      ['dests', 'дестинация'],
+      ['offices', 'офис'],
+    ]) {
+      list(s[k], name);
+      s[k].forEach((d, i) => {
+        const w = `${name} ${i + 1}`;
+        num(d.id, w + ', id');
+        opt(d.name, str, w + ', име');
+        opt(d.km, num, w + ', км');
+        opt(d.purpose, str, w + ', цел');
+        opt(d.type, str, w + ', вид');
+      });
+    }
+    list(s.sheets, 'листове');
+    s.sheets.forEach((x, i) => {
+      const w = `лист ${i + 1}`;
+      (typeof x.no === 'string' && /^ПЛ-\d{4}-\d{4,}$/.test(x.no)) || fail(w, 'невалиден номер');
+      ['issued', 'from', 'to'].forEach((k) => date(x[k], `${x.no}, ${k}`));
+      ['startOdo', 'endOdo', 'personal', 'sumKm', 'liters'].forEach((k) => opt(x[k], num, `${x.no}, ${k}`));
+      opt(x.refuels, str, `${x.no}, зареждания`);
+      opt(x.approver, str, `${x.no}, одобрил`);
+      for (const [k, fields] of [
+        ['vehicle', ['make', 'model', 'plate', 'fuel']],
+        ['driver', ['name', 'pos']],
+        ['company', ['name', 'eik', 'addr', 'mol']],
+      ]) {
+        const o = x[k];
+        (o && typeof o === 'object') || fail(`${x.no}, ${k}`, 'липсва');
+        fields.forEach((f) => opt(o[f], str, `${x.no}, ${k}.${f}`));
+      }
+      num(x.vehicle.id, `${x.no}, vehicle.id`);
+      opt(x.vehicle.cons, num, `${x.no}, vehicle.cons`);
+      list(x.trips, `${x.no}, курсове`);
+      x.trips.forEach((t, j) => {
+        const tw = `${x.no}, курс ${j + 1}`;
+        date(t.date, tw);
+        ['km', 's', 'e', 'l', 'base'].forEach((k) => opt(t[k], num, `${tw}, ${k}`));
+        ['from', 'to', 'via', 'purpose', 'route', 'cname'].forEach((k) => opt(t[k], str, `${tw}, ${k}`));
+        opt(t.ids, list, `${tw}, обекти`);
+        (t.ids || []).forEach((id) => num(id, `${tw}, обект`));
+      });
+    });
+    (Number.isInteger(s.seq) && s.seq >= 0) || fail('брояч на номерата', 'невалиден');
+    opt(s.lastBackup, date, 'последно копие');
+    opt(s.lastVeh, num, 'последен автомобил');
+    if (s.matrix != null) {
+      (typeof s.matrix === 'object' && !Array.isArray(s.matrix)) || fail('разстояния', 'невалидни');
+      Object.values(s.matrix).forEach((v) => num(v, 'разстояния'));
+    }
+    if (s.mtxInfo != null) opt(s.mtxInfo.g, str, 'дата на разстоянията');
+    return s;
+  }
+
+  return { COMPANY, BASE, FUELS, DESTS, LOCKED, isLocked, COORDS, defaults, migrate, checkBackup };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = AppData;

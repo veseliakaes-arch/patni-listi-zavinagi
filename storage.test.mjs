@@ -31,7 +31,14 @@ class FakeStorage {
 const KEY = Store.KEY;
 const withSheet = () => {
   const s = defaults();
-  s.sheets.push({ no: 'ПЛ-2026-0001', from: '2026-09-01', to: '2026-09-30', startOdo: 45000, endOdo: 46000, vehicle: { id: 1 } });
+  s.sheets.push({
+    no: 'ПЛ-2026-0001',
+    from: '2026-09-01',
+    to: '2026-09-30',
+    startOdo: 45000,
+    endOdo: 46000,
+    vehicle: { id: 1 },
+  });
   s.seq = 1;
   return s;
 };
@@ -102,7 +109,10 @@ test('№2: повреден JSON – нищо не се презаписва', 
 });
 
 test('№2: данни от стара версия без дестинации (сценарият от анализа)', () => {
-  localStorage.setItem(KEY, JSON.stringify({ vehicles: [], drivers: [], sheets: [{ no: 'ПЛ-2026-0001' }], seq: 1, dv: 1 }));
+  localStorage.setItem(
+    KEY,
+    JSON.stringify({ vehicles: [], drivers: [], sheets: [{ no: 'ПЛ-2026-0001' }], seq: 1, dv: 1 }),
+  );
   Store.load(defaults, migrate);
   assert.equal(Store.status().kind, 'corrupt');
   assert.match(Store.status().error, /не могат да се прочетат/);
@@ -145,3 +155,61 @@ test('резервно копие: валидно се приема, невал�
   assert.throws(() => Store.parseBackup('{"a":1}', migrate));
   assert.throws(() => Store.parseBackup('не е JSON', migrate));
 });
+
+test('резервно копие: строга проверка спира подправени стойности', () => {
+  const ok = migrate(withFullSheet());
+  assert.equal(AppData.checkBackup(ok), ok);
+  const bad = [
+    (s) => (s.sheets[0].no = '<img src=x onerror=alert(1)>'),
+    (s) => (s.sheets[0].from = '2026-09-01"><script>'),
+    (s) => (s.sheets[0].sumKm = '<b>1</b>'),
+    (s) => (s.vehicles[0].id = '1" onfocus="alert(1)'),
+    (s) => (s.dests[0].km = 'x'),
+    (s) => (s.sheets[0].trips[0].date = 'утре'),
+    (s) => (s.seq = 1.5),
+    (s) => (s.matrix = { '0|1': '<x>' }),
+  ];
+  bad.forEach((spoil, k) => {
+    const s = migrate(withFullSheet());
+    spoil(s);
+    assert.throws(() => AppData.checkBackup(s), Error, `случай ${k + 1}`);
+  });
+});
+
+function withFullSheet() {
+  const s = defaults();
+  s.sheets.push({
+    no: 'ПЛ-2026-0001',
+    issued: '2026-09-30',
+    from: '2026-09-01',
+    to: '2026-09-30',
+    startOdo: 45000,
+    endOdo: 45020,
+    personal: 0,
+    sumKm: 20,
+    liters: 1.16,
+    refuels: '',
+    approver: 'Димитър Бончев Савов',
+    vehicle: { ...s.vehicles[0] },
+    driver: { ...s.drivers[0] },
+    company: { ...s.company },
+    trips: [
+      {
+        date: '2026-09-01',
+        ids: [1],
+        km: 20,
+        s: 45000,
+        e: 45020,
+        l: 1.16,
+        base: 20,
+        from: 'А',
+        to: 'Б',
+        via: 'В',
+        purpose: 'Г',
+      },
+    ],
+  });
+  s.seq = 1;
+  s.lastBackup = '2026-10-01';
+  return s;
+}

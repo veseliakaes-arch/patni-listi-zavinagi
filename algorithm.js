@@ -422,10 +422,111 @@ var Algo = (function () {
     D.liters = D.trips.reduce((s, t) => s + t.l, 0);
   }
 
+  /* ---------- проверки след генериране и при ръчни промени ---------- */
+
+  /** Километри по дни: {'ГГГГ-ММ-ДД': км}. */
+  function dayTotals(trips) {
+    const day = {};
+    trips.forEach((t) => (day[t.date] = (day[t.date] || 0) + (+t.km || 0)));
+    return day;
+  }
+
+  /** Дните, в които сборът надхвърля дневния лимит: [{date, km}], по дата. */
+  function overDays(trips, max = 300) {
+    return Object.entries(dayTotals(trips))
+      .filter(([, km]) => km > max)
+      .map(([date, km]) => ({ date, km }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  /** Праг за предупреждение: среден пробег на работен ден, над който се иска потвърждение. */
+  const PLAUSIBLE_KM_PER_DAY = 120;
+
+  /**
+   * Проверка дали въведеният пробег е правдоподобен, преди да се генерира.
+   * T – служебни км за периода; days – брой работни дни; history – предишни листове на
+   * автомобила като [{km, days}]. Връща списък с причини за съмнение (празен = всичко е наред).
+   * Не е грешка: при съмнение приложението иска потвърждение, че километражът е въведен правилно.
+   */
+  function plausibility({ T, days, history = [], perDay = PLAUSIBLE_KM_PER_DAY }) {
+    const out = [];
+    if (!days) return out;
+    const avg = T / days;
+    if (avg > perDay)
+      out.push(`средно ${Math.round(avg)} км на работен ден – над ${perDay} км, обичайното за градски курсове`);
+    const h = history.filter((x) => x.days > 0 && x.km > 0);
+    if (h.length) {
+      const hAvg = h.reduce((a, x) => a + x.km, 0) / h.reduce((a, x) => a + x.days, 0);
+      if (avg > 1.5 * hAvg && avg - hAvg > 20)
+        out.push(
+          `${(avg / hAvg).toFixed(1).replace('.', ',')} пъти повече от средното за ${h.length === 1 ? 'последния лист' : `последните ${h.length} листа`} на автомобила (${Math.round(hAvg)} км на работен ден)`,
+        );
+    }
+    return out;
+  }
+
+  /**
+   * Нов маршрут за ред i (бутона ↻). Новият маршрут винаги е със своите картографски км.
+   * Първо се търсят маршрути със същите км. Ако няма, се взима маршрут с близки км
+   * (до max(8 км, 15%)), а разликата се поема от посещенията при клиент – така сумата
+   * на листа остава същата, посещенията остават между clientMin и clientMax км,
+   * а нито един ден не минава дневния лимит.
+   * options – вариантите от router.combos(…). Връща {route, adjust: [{index, km}]} или null.
+   */
+  function alternativeRoute({ trips, i, options, max = 300, clientMin = 2, clientMax = 50, rnd = Math.random }) {
+    const t = trips[i],
+      key = (ids) => ids.join('-'),
+      cur = key(t.ids),
+      cands = options.filter((o) => key(o.ids) !== cur);
+    const exact = cands.filter((o) => o.km === t.km);
+    if (exact.length) return { route: exact[rint(0, exact.length - 1, rnd)], adjust: [] };
+    const lim = Math.max(8, t.km * 0.15);
+    for (const o of shuffle(
+      cands.filter((o) => Math.abs(o.km - t.km) <= lim),
+      rnd,
+    )) {
+      const adjust = absorb(trips, i, o.km - t.km, max, clientMin, clientMax);
+      if (adjust) return { route: o, adjust };
+    }
+    return null;
+  }
+
+  // Посещенията при клиент се променят общо с −delta км: първо тези от същия ден, после по дата.
+  function absorb(trips, i, delta, max, clientMin, clientMax) {
+    const day = trips[i].date,
+      order = trips
+        .map((x, j) => j)
+        .filter((j) => j !== i && trips[j].client)
+        .sort(
+          (a, b) =>
+            (trips[a].date === day ? 0 : 1) - (trips[b].date === day ? 0 : 1) ||
+            trips[a].date.localeCompare(trips[b].date),
+        );
+    let need = -delta; // > 0: посещенията растат; < 0: намаляват
+    const adjust = [];
+    for (const j of order) {
+      if (!need) break;
+      const c = trips[j],
+        room = need > 0 ? clientMax - c.km : c.km - clientMin;
+      if (room <= 0) continue;
+      const step = Math.min(room, Math.abs(need));
+      adjust.push({ index: j, km: c.km + Math.sign(need) * step });
+      need -= Math.sign(need) * step;
+    }
+    if (need) return null;
+    const km = trips.map((x) => +x.km || 0);
+    km[i] += delta;
+    adjust.forEach((a) => (km[a.index] = a.km));
+    const totals = {};
+    trips.forEach((x, j) => (totals[x.date] = (totals[x.date] || 0) + km[j]));
+    return Object.values(totals).some((v) => v > max) ? null : adjust;
+  }
+
   return {
     FIXED_HOLIDAYS,
     PURP,
     DISTMSG,
+    PLAUSIBLE_KM_PER_DAY,
     seededRng,
     rint,
     shuffle,
@@ -438,6 +539,10 @@ var Algo = (function () {
     generate,
     describe,
     recalc,
+    dayTotals,
+    overDays,
+    plausibility,
+    alternativeRoute,
   };
 })();
 

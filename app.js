@@ -12,7 +12,9 @@ let S = Store.load(AppData.defaults, AppData.migrate),
   ERR = '',
   ADV = false,
   CONF = '',
-  PENDING = null; // прочетено резервно копие, което чака потвърждение
+  PENDING = null, // прочетено резервно копие, което чака потвърждение
+  WARN = null, // съмнителен пробег, който чака потвърждение: {key, T, reasons}
+  OKKEY = ''; // последният потвърден съмнителен пробег (за „Прегенерирай всичко“)
 
 /** Записва данните; при неуспех показва причината и връща false. */
 function save() {
@@ -32,9 +34,16 @@ const readOnly = () => Store.status().readOnly;
 const $ = (id) => document.getElementById(id),
   nf = (n, d = 2) => Number(n).toFixed(d).replace('.', ','),
   pad = (n, l) => String(n).padStart(l, '0'),
-  dm = (iso) => iso.split('-').reverse().join('.'),
   esc = (s) =>
-    String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]),
+    String(s ?? '').replace(
+      /[&<>"']/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+    ),
+  // ГГГГ-ММ-ДД → ДД.ММ.ГГГГ; всичко друго се екранира, затова резултатът е безопасен за HTML
+  dm = (iso) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    return m ? `${m[3]}.${m[2]}.${m[1]}` : esc(iso);
+  },
   today = () => {
     const d = new Date();
     return d.getFullYear() + '-' + pad(d.getMonth() + 1, 2) + '-' + pad(d.getDate(), 2);
@@ -128,7 +137,10 @@ async function pickBackup(el) {
   const f = el.files && el.files[0];
   if (!f) return;
   try {
-    PENDING = { name: f.name, data: Store.parseBackup(await f.text(), AppData.migrate) };
+    PENDING = {
+      name: f.name,
+      data: Store.parseBackup(await f.text(), (x) => AppData.checkBackup(AppData.migrate(x))),
+    };
   } catch (e) {
     PENDING = null;
     toast('Файлът не е валидно резервно копие: ' + (e.message || e));
@@ -188,7 +200,7 @@ function vHelp() {
 <li>Периодът (от коя до коя дата) се попълва сам. Ако искате друг период, сменете датите.</li>
 <li>Въведете в полето <b>КМ края на периода</b> какво показва километражът на колата в края на периода.</li>
 <li>Натиснете <b>„Генерирай маршрути“</b>. Приложението само ще измисли маршрутите за всеки работен ден, така че сборът да излезе точно колкото сте въвели.</li>
-<li>Прегледайте резултата в същия таб. Ако някой ред не ви харесва, натиснете <b>↻</b> (друг маршрут) или <b>✕</b> (махане на реда).</li>
+<li>Прегледайте резултата в същия таб. Ако някой ред не ви харесва, натиснете <b>↻</b> (друг маршрут) или <b>✕</b> (махане на реда). Новият маршрут е със своите реални километри; ако се различават от старите, разликата се поема от посещение при клиент и сборът остава същият.</li>
 <li>Когато всичко е наред, натиснете <b>„Издай и свали PDF“</b> или <b>„Издай и свали Excel“</b>. Листът получава свой пореден номер и файлът се сваля.</li>
 <li>Всички издадени листове по-късно ги намирате в ${T('История')} – там можете да ги свалите отново.</li></ol></div>
 <div class="card"><h2>Какво има във всеки таб</h2>${li([
@@ -209,7 +221,9 @@ function vHelp() {
     '<b>Километраж в края, по-малък от този в началото, не се приема.</b> Всеки нов лист започва там, където е свършил предишният за същата кола.',
     '<b>Периодите на една кола не могат да се застъпват.</b>',
     '<b>Маршрути има само в работни дни.</b> Събота, неделя, официалните празници, Великден (от Велики петък до понеделник) и почивните дни, пренесени по чл. 154, ал. 2 от Кодекса на труда, се пропускат автоматично. Еднократни почивни дни въведете в „Още опции“ → „Почивни дни“.',
-    '<b>Най-много 300 км на ден.</b> Ако пробегът е твърде голям за периода (над около 2100–2500 км на месец), приложението ще ви каже да удължите периода.',
+    '<b>Най-много 300 км на ден</b> – и след ръчни промени. Ако някой ден мине лимита, това се показва в „Преглед“ и листът не се издава, докато не поправите редовете.',
+    `<b>Необичайно голям пробег.</b> Ако средният пробег е над ${Algo.PLAUSIBLE_KM_PER_DAY} км на работен ден или над 1,5 пъти средното от последните листове на колата, приложението пита дали километражът е въведен правилно, преди да генерира.`,
+    '<b>Пробег, който маршрутите не могат да поемат.</b> На ден има най-много 3 курса към обекти, всеки до най-дългия възможен маршрут (и общо до 295 км). Ако пробегът е повече, излиза грешка с най-големия възможен пробег за периода.',
     '<b>Посещенията при клиент</b> са 2–3 на седмица. Не се сменят с ↻, а се редактират на ръка.',
     '<b>Основните адреси са заключени (🔒)</b> – обектите на BLD и административните сгради не могат да се трият. Собствените ви места можете да триете.',
     '<b>Данните на фирмата и офисът са заключени</b> и не се променят от приложението.',
@@ -264,7 +278,7 @@ function grid(k, cols, tpl) {
         `<tr>${cols
           .map((c) =>
             c[2] == 'd'
-              ? `<td><select onchange="S['${k}'][${i}]['${c[0]}']=+this.value;save()"><option value="0" ${S.drivers.some((x) => x.id == r[c[0]]) ? '' : 'selected'}>— изберете водач —</option>${S.drivers.map((x) => `<option value="${x.id}" ${x.id == r[c[0]] ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></td>`
+              ? `<td><select onchange="S['${k}'][${i}]['${c[0]}']=+this.value;save()"><option value="0" ${S.drivers.some((x) => x.id == r[c[0]]) ? '' : 'selected'}>— изберете водач —</option>${S.drivers.map((x) => `<option value="${esc(x.id)}" ${x.id == r[c[0]] ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></td>`
               : c[2] == 'f'
                 ? `<td><select onchange="S['${k}'][${i}]['${c[0]}']=this.value;save()">${[...new Set([...AppData.FUELS, r[c[0]]].filter(Boolean))].map((x) => `<option ${x == r[c[0]] ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></td>`
                 : c[2] == 's'
@@ -450,7 +464,7 @@ const vs = (vid) => S.sheets.filter((s) => s.vehicle.id == vid),
 
 const ptOpts = (sel) => {
   const o = (id, n) =>
-    `<option value="${id}" ${sel !== undefined && String(sel) == String(id) ? 'selected' : ''}>${esc(n)}</option>`;
+    `<option value="${esc(id)}" ${sel !== undefined && String(sel) == String(id) ? 'selected' : ''}>${esc(n)}</option>`;
   return (
     o(0, S.base + ' (основен офис)') +
     (S.offices.length
@@ -477,8 +491,8 @@ function vNew() {
   const v = S.vehicles,
     d = DRAFT;
   return `<div class="card"><h2>Нов пътен лист</h2><div class="g g6">
-<div><label>Автомобил</label><select id="veh" onchange="autoPeriod()">${v.map((x) => `<option value="${x.id}">${esc(x.plate)} – ${esc(x.make)} ${esc(x.model)}</option>`).join('')}</select></div>
-<div><label>Водач</label><select id="drv" onchange="drvBase()"><option value="">— изберете водач —</option>${S.drivers.map((x) => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></div>
+<div><label>Автомобил</label><select id="veh" onchange="autoPeriod()">${v.map((x) => `<option value="${esc(x.id)}">${esc(x.plate)} – ${esc(x.make)} ${esc(x.model)}</option>`).join('')}</select></div>
+<div><label>Водач</label><select id="drv" onchange="drvBase()"><option value="">— изберете водач —</option>${S.drivers.map((x) => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select></div>
 ${inp('Период от', 'pf', '', 'date', 'onchange="setTo()"')}${inp('Период до', 'pt', '', 'date', 'onchange="syncOdo(true)"')}
 ${inp('КМ края на периода', 'eo', '', 'number', 'inputmode="numeric" oninput="odoNote()" onkeydown="if(event.key===\'Enter\')gen()"')}</div>
 <p class="note" id="sonote"></p>
@@ -489,7 +503,7 @@ ${inp('КМ края на периода', 'eo', '', 'number', 'inputmode="numer
     .join('')}<option value="">— без име (по избор) —</option></select></div>
 <div class="wide"><label for="off">Почивни дни (по избор)</label><input id="off" type="text" placeholder="напр. 02.01.2026 или 24.12.2026..28.12.2026"><p class="note" style="margin:4px 0 0">Великден и пренесените почивни дни се пропускат автоматично. Тук въведете само еднократни почивни дни, обявени от Министерския съвет.</p></div></div>
 <div style="margin-top:12px"><label>Зареждания (по избор)</label><div id="refs">${refRows()}</div><button type="button" onclick="addRef()" style="margin-top:6px">+ Добави зареждане</button></div></details>
-<div id="err" class="err">${esc(ERR)}</div><div class="row"><button class="p big" onclick="gen()">Генерирай маршрути</button></div></div>${d ? vReview() : vIssued()}`;
+<div id="err" class="err">${esc(ERR)}</div>${vWarn()}<div class="row"><button class="p big" onclick="gen()">Генерирай маршрути</button></div></div>${d ? vReview() : vIssued()}`;
 }
 
 let REF = [{ d: '', l: '', n: '' }];
@@ -576,8 +590,13 @@ const odoNote = () => {
   }
 };
 
-function gen() {
+/**
+ * Генерира маршрутите. confirmed – ключът на вече потвърден съмнителен пробег (бутона в
+ * предупреждението); ако входните данни са други, проверката се прави наново.
+ */
+function gen(confirmed) {
   ERR = '';
+  WARN = null;
   try {
     const c0 = S.company;
     if (!c0.name || /допълнете/i.test(c0.name) || !c0.eik || !c0.addr)
@@ -611,7 +630,23 @@ function gen() {
       rt = refText(pf, pt),
       R = router(),
       days = Algo.workdays(pf, pt, off),
-      trips = Algo.generate({ T: eo - so - pk, days, router: R, dests: S.dests, max: mx, s: sp, e: sp });
+      T = eo - so - pk,
+      key = [v.id, pf, pt, so, eo, pk, offText].join('|');
+    if (confirmed === key) OKKEY = key;
+    if (OKKEY !== key) {
+      // правдоподобен ли е пробегът – спрямо обичайното и спрямо последните 3 листа на колата
+      const history = vs(v.id)
+          .filter((x) => x.to < pf)
+          .sort((a, b) => (a.to < b.to ? 1 : -1))
+          .slice(0, 3)
+          .map((x) => ({ km: x.sumKm, days: Algo.workdays(x.from, x.to).length })),
+        reasons = Algo.plausibility({ T, days: days.length, history });
+      if (reasons.length) {
+        WARN = { key, T, reasons };
+        throw '';
+      }
+    }
+    const trips = Algo.generate({ T, days, router: R, dests: S.dests, max: mx, s: sp, e: sp });
     trips.forEach((t) => Algo.describe(t, R, sp, sp));
     ISSUED = null;
     DRAFT = {
@@ -635,7 +670,7 @@ function gen() {
     if (vv) vv.drv = dr.id;
     save();
   } catch (e) {
-    ERR = String(e.message || e);
+    ERR = e === '' ? '' : String(e.message || e);
     DRAFT = null;
     if (/Още опции|точк|Водач|период|Период|километраж|Почивни/.test(ERR)) ADV = true;
   }
@@ -644,21 +679,31 @@ function gen() {
   restore(k);
 }
 
+/** Предупреждение за съмнителен пробег с бутон за потвърждение. */
+function vWarn() {
+  if (!WARN) return '';
+  return `<div class="alert" style="margin:8px 0"><b>Проверете километража:</b> ${esc(WARN.T)} км служебен пробег е необичайно много –<ul style="margin:6px 0;padding-left:20px">${WARN.reasons.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>Ако крайният километраж е въведен правилно, потвърдете.<div class="row"><button class="p" onclick="gen(WARN.key)">Да, километражът е верен – генерирай</button></div></div>`;
+}
+
 function vIssued() {
   const x = S.sheets[ISSUED];
   if (!x) return '';
-  return `<div class="card"><h2>Издаден: ${esc(x.no)}</h2><p>${esc(x.vehicle.plate || '')} · ${esc(x.driver.name || '')} · ${dm(x.from)} – ${dm(x.to)} · <b>${x.sumKm} км</b></p><div class="row"><button class="p big" onclick="expPdf([ISSUED])">Свали PDF</button><button class="big" onclick="expXls([ISSUED])">Свали Excel</button><button onclick="ISSUED=null;render()">Скрий</button></div><p class="note">Всички издадени листове са в „История“.</p></div>`;
+  return `<div class="card"><h2>Издаден: ${esc(x.no)}</h2><p>${esc(x.vehicle.plate || '')} · ${esc(x.driver.name || '')} · ${dm(x.from)} – ${dm(x.to)} · <b>${esc(x.sumKm)} км</b></p><div class="row"><button class="p big" onclick="expPdf([ISSUED])">Свали PDF</button><button class="big" onclick="expXls([ISSUED])">Свали Excel</button><button onclick="ISSUED=null;render()">Скрий</button></div><p class="note">Всички издадени листове са в „История“.</p></div>`;
 }
 
 function vReview() {
   const d = DRAFT,
     ok = Math.abs(d.diff) <= 1,
-    can = ok && !readOnly(),
-    bar = `<p>Сума на маршрутите: <b>${d.sumKm} км</b> · Въведени (без лични): <b>${d.target} км</b> · Разлика: <span class="${ok ? 'ok' : 'bad'}">${d.diff > 0 ? '+' : ''}${d.diff} км ${ok ? '(в толеранса ±1 км)' : '(над толеранса!)'}</span><br>Нормативен разход на гориво (${esc(d.vehicle.fuel)}): <b>${nf(d.liters)} ${U(d.vehicle)}</b> (${nf(d.vehicle.cons, 1)} ${U(d.vehicle)}/100 км) · Лични км: ${d.personal}</p>
+    over = Algo.overDays(d.trips, d.params.mx),
+    can = ok && !over.length && !readOnly(),
+    overNote = over.length
+      ? `<br><span class="bad">Над дневния лимит от ${d.params.mx} км: ${over.map((x) => `${dm(x.date)} (${x.km} км)`).join(', ')} – поправете редовете, иначе листът не може да се издаде.</span>`
+      : '',
+    bar = `<p>Сума на маршрутите: <b>${d.sumKm} км</b> · Въведени (без лични): <b>${d.target} км</b> · Разлика: <span class="${ok ? 'ok' : 'bad'}">${d.diff > 0 ? '+' : ''}${d.diff} км ${ok ? '(в толеранса ±1 км)' : '(над толеранса!)'}</span><br>Нормативен разход на гориво (${esc(d.vehicle.fuel)}): <b>${nf(d.liters)} ${U(d.vehicle)}</b> (${nf(d.vehicle.cons, 1)} ${U(d.vehicle)}/100 км) · Лични км: ${esc(d.personal)}${overNote}</p>
 `,
     act = `<div class="sticky"><div class="row" style="margin:0"><button class="p big" ${can ? '' : 'disabled'} onclick="saveSheet('pdf')">Издай и свали PDF</button><button class="p big" ${can ? '' : 'disabled'} onclick="saveSheet('xls')">Издай и свали Excel</button><button onclick="gen()">Прегенерирай всичко</button>${readOnly() ? '<span class="bad">Издаването е спряно – вижте съобщението най-горе.</span>' : ''}</div></div>`;
   return `<div class="card"><h2>Преглед</h2>${bar}<div class="sc" style="margin-top:14px"><table><tr><th>Дата</th><th>Начална точка</th><th>Маршрут</th><th>Крайна точка</th><th>Цел</th><th>Нач. км</th><th>Изм. км</th><th>Крайни км</th><th>${d.vehicle.fuel == 'Електрически' ? 'kWh' : 'Литри'} (${esc(d.vehicle.fuel.toLowerCase())})</th><th></th></tr>
-${d.trips.map((t, i) => `<tr><td><input type="date" value="${t.date}" onchange="DRAFT.trips[${i}].date=this.value"></td><td><input style="min-width:170px" value="${esc(t.from)}" oninput="DRAFT.trips[${i}].from=this.value"></td><td><input style="min-width:210px" placeholder="директно" value="${esc(t.via)}" oninput="DRAFT.trips[${i}].via=this.value"></td><td><input style="min-width:170px" value="${esc(t.to)}" oninput="DRAFT.trips[${i}].to=this.value"></td><td><input style="min-width:200px" value="${esc(t.purpose)}" oninput="DRAFT.trips[${i}].purpose=this.value"></td><td>${t.s}</td><td><input type="number" style="width:80px" value="${t.km}" onchange="DRAFT.trips[${i}].km=+this.value;upd()"></td><td>${t.e}</td><td>${nf(t.l)}</td><td style="white-space:nowrap"><button title="Прегенерирай маршрута" onclick="regen(${i})">↻</button> <button onclick="DRAFT.trips.splice(${i},1);upd()">✕</button></td></tr>`).join('')}</table></div>${d.trips.length > 12 ? `<div style="margin-top:14px">${bar}</div>` : ''}${act}</div>`;
+${d.trips.map((t, i) => `<tr><td><input type="date" value="${esc(t.date)}" onchange="DRAFT.trips[${i}].date=this.value;upd()"></td><td><input style="min-width:170px" value="${esc(t.from)}" oninput="DRAFT.trips[${i}].from=this.value"></td><td><input style="min-width:210px" placeholder="директно" value="${esc(t.via)}" oninput="DRAFT.trips[${i}].via=this.value"></td><td><input style="min-width:170px" value="${esc(t.to)}" oninput="DRAFT.trips[${i}].to=this.value"></td><td><input style="min-width:200px" value="${esc(t.purpose)}" oninput="DRAFT.trips[${i}].purpose=this.value"></td><td>${esc(t.s)}</td><td><input type="number" min="0" style="width:80px" value="${esc(t.km)}" onchange="DRAFT.trips[${i}].km=+this.value;upd()"></td><td>${esc(t.e)}</td><td>${nf(t.l)}</td><td style="white-space:nowrap"><button title="Прегенерирай маршрута" onclick="regen(${i})">↻</button> <button onclick="DRAFT.trips.splice(${i},1);upd()">✕</button></td></tr>`).join('')}</table></div>${d.trips.length > 12 ? `<div style="margin-top:14px">${bar}</div>` : ''}${act}</div>`;
 }
 
 // стойностите на формата се пазят при прерисуване след „Генерирай“ и при редакция на ред
@@ -688,21 +733,29 @@ function regen(i) {
   }
   const R = router(),
     p = DRAFT.params,
-    o = R.combos(
+    options = R.combos(
       S.dests.filter((d) => p.dl.includes(d.id)),
       p.mx - 5,
       p.s,
       p.e,
-    ).filter((o) => Math.abs(o.km - t.km) <= Math.max(8, t.km * 0.15) && o.ids.join() != t.ids.join());
-  if (!o.length) {
-    toast('Няма подходяща алтернатива с този пробег');
+    ),
+    alt = Algo.alternativeRoute({ trips: DRAFT.trips, i, options, max: p.mx });
+  if (!alt) {
+    toast('Няма друг маршрут със същите километри, а разликата не може да се поеме от посещение при клиент.');
     return;
   }
-  const c = o[Algo.rint(0, o.length - 1)];
-  t.ids = c.ids;
-  t.base = c.km;
+  const was = t.km;
+  // новият маршрут е със своите картографски км; ако се различават, разликата отива при посещение при клиент
+  t.ids = alt.route.ids;
+  t.km = alt.route.km;
+  t.base = alt.route.km;
+  alt.adjust.forEach((a) => (DRAFT.trips[a.index].km = a.km));
   Algo.describe(t, R, p.s, p.e);
   upd();
+  if (alt.adjust.length)
+    toast(
+      `Новият маршрут е ${t.km} км (беше ${was} км). Разликата от ${Math.abs(t.km - was)} км е поета от посещение при клиент на ${[...new Set(alt.adjust.map((a) => dm(DRAFT.trips[a.index].date)))].join(', ')}, така че сборът остава същият.`,
+    );
 }
 
 function saveSheet(pdf) {
@@ -717,6 +770,14 @@ function saveSheet(pdf) {
   if (Math.abs(d.diff) > 1) return;
   if (d.trips.some((t) => !t.date || t.date < d.from || t.date > d.to)) {
     toast('Има маршрути с дата извън избрания период.');
+    return;
+  }
+  const over = Algo.overDays(d.trips, d.params.mx);
+  if (over.length) {
+    toast(
+      `Листът не може да се издаде: ${over.map((x) => `${dm(x.date)} е ${x.km} км`).join(', ')} – над дневния лимит от ${d.params.mx} км.`,
+    );
+    render();
     return;
   }
   d.trips.sort((a, b) => (a.date < b.date ? -1 : 1));
@@ -778,15 +839,15 @@ function vHist() {
   const L = S.sheets
     .filter((s) => (!fv || s.vehicle.id == fv) && (!ff || s.to >= ff) && (!ft || s.from <= ft))
     .reverse();
-  return `<div class="card"><h2>История на пътните листа</h2><div class="g"><div><label>Автомобил</label><select onchange="FV=this.value;render()"><option value="">Всички</option>${S.vehicles.map((v) => `<option value="${v.id}" ${fv == v.id ? 'selected' : ''}>${esc(v.plate)}</option>`).join('')}</select></div><div><label>От</label><input type="date" value="${ff}" onchange="FF=this.value;render()"></div><div><label>До</label><input type="date" value="${ft}" onchange="FT=this.value;render()"></div></div>
+  return `<div class="card"><h2>История на пътните листа</h2><div class="g"><div><label>Автомобил</label><select onchange="FV=this.value;render()"><option value="">Всички</option>${S.vehicles.map((v) => `<option value="${esc(v.id)}" ${fv == v.id ? 'selected' : ''}>${esc(v.plate)}</option>`).join('')}</select></div><div><label>От</label><input type="date" value="${esc(ff)}" onchange="FF=this.value;render()"></div><div><label>До</label><input type="date" value="${esc(ft)}" onchange="FT=this.value;render()"></div></div>
 <div class="sc"><table style="margin-top:10px"><tr><th>№</th><th>Издаден</th><th>Автомобил</th><th>Водач</th><th>Период</th><th>Км</th><th>Разход</th><th></th></tr>${
     L.map((s) => {
       const i = S.sheets.indexOf(s);
-      return `<tr><td>${s.no}</td><td>${dm(s.issued)}</td><td>${esc(s.vehicle.plate)}</td><td>${esc(s.driver.name)}</td><td>${dm(s.from)} – ${dm(s.to)}</td><td>${s.endOdo - s.startOdo}</td><td>${nf(s.liters)} ${U(s.vehicle)} (${esc(s.vehicle.fuel.toLowerCase())})</td><td style="white-space:nowrap"><button onclick="expPdf([${i}])">PDF</button> <button onclick="expXls([${i}])">Excel</button>${CONF == 'd' + i ? `<button class="p" onclick="delSheet(${i})">Потвърди изтриването</button> <button onclick="CONF='';render()">Отказ</button>` : i >= S.sheets.length - 3 ? `<button onclick="delSheet(${i})">Изтрий</button>` : `<button disabled title="Могат да се изтриват само последните 3 издадени листа">Изтрий</button>`}</td></tr>`;
+      return `<tr><td>${esc(s.no)}</td><td>${dm(s.issued)}</td><td>${esc(s.vehicle.plate)}</td><td>${esc(s.driver.name)}</td><td>${dm(s.from)} – ${dm(s.to)}</td><td>${esc(s.endOdo - s.startOdo)}</td><td>${nf(s.liters)} ${U(s.vehicle)} (${esc(s.vehicle.fuel.toLowerCase())})</td><td style="white-space:nowrap"><button onclick="expPdf([${i}])">PDF</button> <button onclick="expXls([${i}])">Excel</button>${CONF == 'd' + i ? `<button class="p" onclick="delSheet(${i})">Потвърди изтриването</button> <button onclick="CONF='';render()">Отказ</button>` : i >= S.sheets.length - 3 ? `<button onclick="delSheet(${i})">Изтрий</button>` : `<button disabled title="Могат да се изтриват само последните 3 издадени листа">Изтрий</button>`}</td></tr>`;
     }).join('') || '<tr><td colspan=8 class="note">Няма издадени листове</td></tr>'
   }</table></div>
 <div class="row"><button ${L.length ? '' : 'disabled'} onclick="expPdf([${L.map((s) => S.sheets.indexOf(s))}])">Експорт на всички филтрирани – PDF</button><button ${L.length ? '' : 'disabled'} onclick="expXls([${L.map((s) => S.sheets.indexOf(s))}])">Експорт на всички филтрирани – Excel</button></div>
-${CONF[0] == 'd' && S.sheets[+CONF.slice(1)] ? `<p class="bad">${S.sheets[+CONF.slice(1)].no}: ${+CONF.slice(1) === S.sheets.length - 1 ? 'номерът ще бъде освободен.' : 'в номерацията ще остане пропуск.'} За данъчни цели изтривайте само лист, който не е отпечатан или използван.</p>` : ''}
+${CONF[0] == 'd' && S.sheets[+CONF.slice(1)] ? `<p class="bad">${esc(S.sheets[+CONF.slice(1)].no)}: ${+CONF.slice(1) === S.sheets.length - 1 ? 'номерът ще бъде освободен.' : 'в номерацията ще остане пропуск.'} За данъчни цели изтривайте само лист, който не е отпечатан или използван.</p>` : ''}
 <p class="note">Номерацията е последователна. Могат да се изтриват само последните 3 издадени листа. Данните се пазят в браузъра.</p></div>`;
 }
 
