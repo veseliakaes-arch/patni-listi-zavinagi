@@ -1,0 +1,417 @@
+/* Шрифтът Manrope се зарежда от самия сайт (vendor/manrope, лиценз SIL OFL 1.1) – без Google Fonts. */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url(../vendor/manrope/manrope-cyrillic-wght-normal.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url(../vendor/manrope/manrope-latin-ext-wght-normal.woff2) format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url(../vendor/manrope/manrope-latin-wght-normal.woff2) format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
+    U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+:root {
+  --bg: #ffffff;
+  --grid: rgba(200, 32, 46, 0.045);
+  --fg: #241a1d;
+  --card: #fff;
+  --bd: #ddd2d4;
+  --ac: #c8202e;
+  --yl: #d11f2e;
+  --yl-d: #9f1824;
+  --st: #241a1d;
+  --thbg: #fbeaec;
+  --thfg: #241a1d;
+  --ok: #15803d;
+  --bad: #c2410c;
+  --mut: #6b5b5f;
+  --hd: #c8202e;
+  --pad: max(16px, calc((100vw - 1280px) / 2 + 16px));
+  --head: Manrope, 'Segoe UI', system-ui, Arial, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #161012;
+    --grid: rgba(255, 255, 255, 0.035);
+    --fg: #f2e9ea;
+    --card: #211719;
+    --bd: #4a3a3e;
+    --ac: #ff7f89;
+    --yl: #e5424f;
+    --yl-d: #a4202c;
+    --st: #ff7f89;
+    --thbg: #33262a;
+    --thfg: #f2e9ea;
+    --ok: #4cc27f;
+    --bad: #ffb086;
+    --mut: #b3a3a7;
+    --hd: #7d1019;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #161012;
+  --grid: rgba(255, 255, 255, 0.035);
+  --fg: #f2e9ea;
+  --card: #211719;
+  --bd: #4a3a3e;
+  --ac: #ff7f89;
+  --yl: #e5424f;
+  --yl-d: #a4202c;
+  --st: #ff7f89;
+  --thbg: #33262a;
+  --thfg: #f2e9ea;
+  --ok: #4cc27f;
+  --bad: #ffb086;
+  --mut: #b3a3a7;
+  --hd: #7d1019;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 56px 72px;
+  color: var(--fg);
+  font: 16px/1.5 var(--head);
+  font-variant-numeric: tabular-nums;
+}
+header {
+  background: var(--hd);
+  color: #fff;
+  padding: 20px var(--pad) 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  min-height: 84px;
+}
+h1 {
+  font: 800 25px/1.1 var(--head);
+  margin: 0;
+  letter-spacing: -0.2px;
+  position: relative;
+  z-index: 1;
+}
+.mark {
+  width: 38px;
+  height: 38px;
+  border: 2px solid #fff;
+  flex: none;
+  position: relative;
+  z-index: 1;
+  background:
+    linear-gradient(#fff, #fff) 6px 6px/8px 8px no-repeat,
+    linear-gradient(#fff, #fff) 18px 6px/8px 8px no-repeat,
+    linear-gradient(#fff, #fff) 6px 18px/8px 8px no-repeat,
+    linear-gradient(#fff, #fff) 18px 18px/8px 8px no-repeat;
+}
+.sky {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: min(560px, 62%);
+  pointer-events: none;
+}
+nav {
+  display: flex;
+  gap: 4px;
+  padding: 14px var(--pad) 0;
+  flex-wrap: wrap;
+}
+nav button {
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  font: 600 15px var(--head);
+  color: var(--mut);
+  padding: 9px 14px;
+  box-shadow: none;
+}
+nav button:hover {
+  color: var(--fg);
+  border-color: transparent;
+  border-bottom-color: var(--bd);
+}
+nav .on,
+nav .on:hover {
+  color: var(--fg);
+  border-bottom-color: var(--yl);
+}
+main {
+  padding: 18px 16px 56px;
+  max-width: 1280px;
+  margin: auto;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+h2 {
+  font: 700 18px/1.2 var(--head);
+  margin: 0 0 16px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--bd);
+}
+label {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  color: var(--fg);
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--yl);
+  box-shadow: 0 0 0 3px rgba(209, 31, 46, 0.25);
+}
+:focus-visible {
+  outline: 3px solid var(--yl);
+  outline-offset: 2px;
+}
+button {
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.12s;
+}
+button:hover {
+  border-color: var(--yl);
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+button.p {
+  background: var(--yl);
+  color: #fff;
+  border-color: var(--yl);
+}
+button.p:hover {
+  background: var(--yl-d);
+  border-color: var(--yl-d);
+}
+.g {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.g > div {
+  min-width: 0;
+}
+.g select,
+.g input,
+.g textarea {
+  width: 100%;
+  min-width: 0;
+}
+.wide {
+  grid-column: 1/-1;
+}
+@media (min-width: 1000px) {
+  .g6 {
+    grid-template-columns: 2fr 1.4fr 1fr 1fr 1.2fr;
+  }
+}
+.big {
+  font-size: 15.5px;
+  padding: 11px 26px;
+}
+summary {
+  cursor: pointer;
+  color: var(--ac);
+  font-weight: 600;
+  padding: 4px 0;
+}
+td select {
+  width: 100%;
+  min-width: 150px;
+}
+.sc {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th,
+td {
+  border-bottom: 1px solid var(--bd);
+  padding: 5px 6px;
+  text-align: left;
+  vertical-align: middle;
+}
+th {
+  background: var(--thbg);
+  color: var(--thfg);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 6px;
+  white-space: nowrap;
+}
+tr:hover td {
+  background: rgba(209, 31, 46, 0.08);
+}
+td input {
+  width: 100%;
+  min-width: 70px;
+}
+.ok {
+  color: var(--ok);
+  font-weight: 700;
+}
+.bad {
+  color: var(--bad);
+  font-weight: 700;
+}
+.err {
+  color: var(--bad);
+  margin: 8px 0;
+  font-weight: 600;
+}
+.err:not(:empty) {
+  border-left: 4px solid var(--bad);
+  padding: 8px 12px;
+  background: rgba(194, 65, 12, 0.07);
+}
+.note {
+  color: var(--mut);
+  font-size: 14px;
+}
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 12px;
+}
+.has-photo header {
+  min-height: 132px;
+  background:
+    linear-gradient(
+        90deg,
+        rgba(176, 22, 36, 1) 0,
+        rgba(200, 32, 46, 0.8) 30%,
+        rgba(200, 32, 46, 0.25) 65%,
+        rgba(200, 32, 46, 0) 100%
+      )
+      right top/838px 100% no-repeat,
+    url(../header.jpg) right top/838px 100% no-repeat,
+    #b01624;
+}
+.has-photo .sky {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+input,
+select,
+textarea,
+button {
+  font-size: 16px;
+}
+.sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: var(--card);
+  border-top: 1px solid var(--bd);
+  margin: 14px -18px -18px;
+  padding: 12px 18px;
+}
+input.lk {
+  background: #f1f1f1;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* съобщение за проблем със записа на данните */
+#banner {
+  max-width: 1280px;
+  margin: 14px auto 0;
+  padding: 0 16px;
+}
+#banner:empty {
+  display: none;
+}
+.alert {
+  border-left: 4px solid var(--bad);
+  background: rgba(194, 65, 12, 0.08);
+  color: var(--fg);
+  padding: 12px 14px;
+  border-radius: 4px;
+}
+.alert .row {
+  margin-top: 10px;
+}
+/* етикет, който изглежда като бутон (избор на файл) */
+label.btn {
+  display: inline-block;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--fg);
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+label.btn:hover {
+  border-color: var(--yl);
+}
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--fg);
+  color: var(--bg);
+  padding: 10px 16px;
+  border-radius: 8px;
+  z-index: 9;
+  max-width: 90%;
+}
